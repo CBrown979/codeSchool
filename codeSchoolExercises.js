@@ -1,20 +1,62 @@
-// Chapter 3 - Streams
+var http = require('http');
+
+http.createServer(function(request, response) {
+  response.writeHead(200); 
+  response.write("Hello, this is Candice");
+  response.end();
+}).listen(8080);
+
+//Current Blocking below
 var fs = require('fs');
+var contents = fs.readFileSync('index.html');
+console.log(contents);
 
-var file = fs.createReadStream('fruits.txt');
-
-file.on('readable', function(){
-  var chunk;
-  while(null !== (chunk = file.read())){
-    console.log(chunk.toString());
-  }
+//Converted Non-Blocking below - same example as above
+var fs = require('fs');
+fs.readFile('index.html', function(error, contents){
+  console.log(contents);
 });
-// Inside the callback, read the data chunks from the stream and print them to the 
-// console using console.log() - you might want to use a while loop to do this. 
-// Don't forget to call toString() on the data before printing it.
 
-//File Piping
-//Instead of manually listening for the 'readable' event on the Readable stream, let's use pipe to read from the stream and write directly to process.stdout.
+//Type help to see the help menu
+$ node file_read.js
+// output - <html><p>Hello, this is Dog</p></html>
+Congratulations, you're correct!
+
+//Read file in server
+var http = require('http');
 var fs = require('fs');
-var file = fs.createReadStream('fruits.txt');
-file.pipe(process.stdout);
+
+http.createServer(function(request, response) {
+  response.writeHead(200);
+  fs.readFile('index.html', function(error, contents){
+  response.write(contents); 
+    response.end();
+  });
+}).listen(8080);
+
+
+//Issuing a Request using curl -- curl https
+
+//Writing Response Headers
+var http = require('http');
+var fs = require('fs');
+http.createServer(function(request, response) {
+  response.writeHead(200, {
+    'Content-Type': 'text/html'
+  });
+  fs.readFile('index.html', function(err, contents) {
+    response.write(contents);
+    response.end();
+  });
+}).listen(8080);
+
+//Response End
+var http = require('http');
+http.createServer(function(request, response) {
+  response.writeHead(200);
+  response.end("Hello, this is dog");
+}).listen(8080);
+
+
+
+
