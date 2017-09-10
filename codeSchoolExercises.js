@@ -1,62 +1,80 @@
-var http = require('http');
+//Event Emitters - Level 2
 
-http.createServer(function(request, response) {
-  response.writeHead(200); 
-  response.write("Hello, this is Candice");
-  response.end();
-}).listen(8080);
+//We're going to create a custom chat EventEmitter.
+//Create a new EventEmitter object and assign it to a variable called 'chat'.
+var events = require('events');
+var EventEmitter = events.EventEmitter;
+var chat = new EventEmitter();
 
-//Current Blocking below
-var fs = require('fs');
-var contents = fs.readFileSync('index.html');
-console.log(contents);
-
-//Converted Non-Blocking below - same example as above
-var fs = require('fs');
-fs.readFile('index.html', function(error, contents){
-  console.log(contents);
+//Next, let's listen for the 'message' event on our new chat object. Remember to add a callback that accepts the message parameter.
+//Log the message to the console using console.log().
+chat.on('message', function(message){
+  console.log(message);
 });
 
-//Type help to see the help menu
-$ node file_read.js
-// output - <html><p>Hello, this is Dog</p></html>
-Congratulations, you're correct!
+//On the chat object, emit the 'join' event and pass in a custom message as a string.
+chat.emit('join', "Whaddup");
 
-//Read file in server
+//Now emit the 'message' event on the chat object. Just like before, remember to pass in a custom message as a string.
+chat.emit('message', "MillyRock");
+
+// Just like you saw in the video, refactor the HTTP server code to explicitly bind a callback to the 'request' event using the on function.
+// Add an event listener on the server variable that listens to the request event. The event listener should take a callback function with two arguments, request and response.
+// var http = require('http');
+// var server = http.createServer(function(request, response) {
+//   response.writeHead(200);
+//   response.write("Hello, this is dog");
+//   response.end();
+// });
+server.on('request', function(request, response){});
+// server.listen(8080);
+
+// Move the logic for handling the request from the http.createServer() callback to your new 'request' event listener. 
+// Remember to remove the http.createServer() callback once the code has been moved.
+// Remove the original request callback.
 var http = require('http');
-var fs = require('fs');
-
-http.createServer(function(request, response) {
+var server = http.createServer();
+server.on('request', function(request, response){
   response.writeHead(200);
-  fs.readFile('index.html', function(error, contents){
-  response.write(contents); 
-    response.end();
-  });
-}).listen(8080);
+  response.write("Hello, this is dog");
+  response.end();
+});
+server.listen(8080);
+
+//Add a second 'request' handler to the HTTP server.
+server.on('request', function(request, response){});
+
+//From inside of the new handler, log the message "New request coming in..." using console.log().
+// var http = require('http');
+// var server = http.createServer();
+// server.on('request', function(request, response) {
+//   response.writeHead(200);
+//   response.write("Hello, this is dog");
+//   response.end();
+// });
+server.on('request', function(request, response){
+  console.log("New request coming in...");
+});
+// server.listen(8080);
 
 
-//Issuing a Request using curl -- curl https
+//Like our parents always used to say, listening is more important than talking! Modify the server so that we know when it's closed down.
+//Listen for the 'close' event on the server. The event listener should take a callback function that accepts no arguments.
+server.on('close', function(){});
 
-//Writing Response Headers
-var http = require('http');
-var fs = require('fs');
-http.createServer(function(request, response) {
-  response.writeHead(200, {
-    'Content-Type': 'text/html'
-  });
-  fs.readFile('index.html', function(err, contents) {
-    response.write(contents);
-    response.end();
-  });
-}).listen(8080);
+//Inside the 'close' callback, log the message "Closing down the server...".
+// var http = require('http');
+// var server = http.createServer();
 
-//Response End
-var http = require('http');
-http.createServer(function(request, response) {
-  response.writeHead(200);
-  response.end("Hello, this is dog");
-}).listen(8080);
-
-
-
-
+// server.on('request', function(request, response) {
+//   response.writeHead(200);
+//   response.write("Hello, this is dog");
+//   response.end();
+// });
+// server.on('request', function(request, response) {
+//   console.log("New request coming in...");
+// });
+server.on('close', function(){
+  console.log("Closing down the server...");
+});
+// server.listen(8080);
