@@ -1,80 +1,76 @@
-//Event Emitters - Level 2
+// Chapter 3 - Streams
 
-//We're going to create a custom chat EventEmitter.
-//Create a new EventEmitter object and assign it to a variable called 'chat'.
-var events = require('events');
-var EventEmitter = events.EventEmitter;
-var chat = new EventEmitter();
+//Lets use the fs module to read a file and log its contents to the console.
+//Use the fs module to create a Readable stream for fruits.txt. Store the new stream in a variable called file.
+var file = fs.createReadStream('fruits.txt');
 
-//Next, let's listen for the 'message' event on our new chat object. Remember to add a callback that accepts the message parameter.
-//Log the message to the console using console.log().
-chat.on('message', function(message){
-  console.log(message);
+//Next, listen to the readable event on the newly created stream and give it a callback.
+file.on('readable', function(){});
+
+// Inside the callback, read the data chunks from the stream and print them to the console using console.log() - 
+// you might want to use a while loop to do this. Don't forget to call toString() on the data before printing it.
+// var fs = require('fs');
+// var file = fs.createReadStream('fruits.txt');
+file.on('readable', function(){
+  var chunk = null; 
+  while (null !== (chunk = file.read())){
+    console.log(chunk.toString());
+  }
+});
+// Instead of manually listening for the 'readable' event on the Readable stream, let's use pipe to read from the stream and write directly to process.stdout.
+// Start by removing the code for the readable handler.
+var fs = require('fs');
+var file = fs.createReadStream('fruits.txt');
+file.pipe(process.stdout);
+
+//The following code will throw an error because pipe automatically closed our writable stream.
+var fs = require('fs');
+var file = fs.createReadStream('origin.txt');
+var destFile = fs.createWriteStream('destination.txt');
+
+file.pipe(process.stdout);
+
+file.on('end', function(){
+  destFile.end('Finished!');
 });
 
-//On the chat object, emit the 'join' event and pass in a custom message as a string.
-chat.emit('join', "Whaddup");
+//You'll need to consult the pipe documentation to figure out the option which keeps the Write stream open and dispatches the end event.
+// var fs = require('fs');
+// var file = fs.createReadStream('origin.txt');
+// var destFile = fs.createWriteStream('destination.txt');
+file.pipe(destFile, { end: false });
 
-//Now emit the 'message' event on the chat object. Just like before, remember to pass in a custom message as a string.
-chat.emit('message', "MillyRock");
+file.on('end', function(){
+  destFile.end('Finished!');
+});
+// From Documention
+// By default, stream.end() is called on the destination Writable stream when the source Readable stream emits 'end', so that the destination is no longer writable. 
+// To disable this default behavior, the end option can be passed as false, causing the destination stream to remain open, as illustrated in the following example:
 
-// Just like you saw in the video, refactor the HTTP server code to explicitly bind a callback to the 'request' event using the on function.
-// Add an event listener on the server variable that listens to the request event. The event listener should take a callback function with two arguments, request and response.
-// var http = require('http');
-// var server = http.createServer(function(request, response) {
-//   response.writeHead(200);
-//   response.write("Hello, this is dog");
-//   response.end();
+// reader.pipe(writer, { end: false });
+// reader.on('end', () => {
+//   writer.end('Goodbye\n');
 // });
-server.on('request', function(request, response){});
-// server.listen(8080);
+// One important caveat is that if the Readable stream emits an error during processing, the Writable destination is not closed automatically. 
+// If an error occurs, it will be necessary to manually close each stream in order to prevent memory leaks.
 
-// Move the logic for handling the request from the http.createServer() callback to your new 'request' event listener. 
-// Remember to remove the http.createServer() callback once the code has been moved.
-// Remove the original request callback.
+// Note: The process.stderr and process.stdout Writable streams are never closed until the Node.js process exits, regardless of the specified options.
+
+
+//Let's create an HTTP server that will serve index.html.
+var fs = require('fs');
 var http = require('http');
-var server = http.createServer();
-server.on('request', function(request, response){
-  response.writeHead(200);
-  response.write("Hello, this is dog");
-  response.end();
-});
-server.listen(8080);
 
-//Add a second 'request' handler to the HTTP server.
-server.on('request', function(request, response){});
+http.createServer(function(request, response) {
+  response.writeHead(200, {'Content-Type': 'text/html'});
 
-//From inside of the new handler, log the message "New request coming in..." using console.log().
-// var http = require('http');
-// var server = http.createServer();
-// server.on('request', function(request, response) {
-//   response.writeHead(200);
-//   response.write("Hello, this is dog");
-//   response.end();
-// });
-server.on('request', function(request, response){
-  console.log("New request coming in...");
-});
-// server.listen(8080);
+  var file = fs.createReadStream('index.html');
+}).listen(8080);
 
 
-//Like our parents always used to say, listening is more important than talking! Modify the server so that we know when it's closed down.
-//Listen for the 'close' event on the server. The event listener should take a callback function that accepts no arguments.
-server.on('close', function(){});
+//Instead of manually listening for the 'readable' event on the Readable stream, let's use pipe to read from the stream and write directly to process.stdout.
+var fs = require('fs');
+var file = fs.createReadStream('fruits.txt');
+file.pipe(process.stdout);
+file.pipe('readable', function(){});
 
-//Inside the 'close' callback, log the message "Closing down the server...".
-// var http = require('http');
-// var server = http.createServer();
-
-// server.on('request', function(request, response) {
-//   response.writeHead(200);
-//   response.write("Hello, this is dog");
-//   response.end();
-// });
-// server.on('request', function(request, response) {
-//   console.log("New request coming in...");
-// });
-server.on('close', function(){
-  console.log("Closing down the server...");
-});
-// server.listen(8080);
