@@ -1,76 +1,103 @@
-// Chapter 3 - Streams
+// Chapter 4 - Modules
 
-//Lets use the fs module to read a file and log its contents to the console.
-//Use the fs module to create a Readable stream for fruits.txt. Store the new stream in a variable called file.
-var file = fs.createReadStream('fruits.txt');
-
-//Next, listen to the readable event on the newly created stream and give it a callback.
-file.on('readable', function(){});
-
-// Inside the callback, read the data chunks from the stream and print them to the console using console.log() - 
-// you might want to use a while loop to do this. Don't forget to call toString() on the data before printing it.
-// var fs = require('fs');
-// var file = fs.createReadStream('fruits.txt');
-file.on('readable', function(){
-  var chunk = null; 
-  while (null !== (chunk = file.read())){
-    console.log(chunk.toString());
-  }
-});
-// Instead of manually listening for the 'readable' event on the Readable stream, let's use pipe to read from the stream and write directly to process.stdout.
-// Start by removing the code for the readable handler.
-var fs = require('fs');
-var file = fs.createReadStream('fruits.txt');
-file.pipe(process.stdout);
-
-//The following code will throw an error because pipe automatically closed our writable stream.
-var fs = require('fs');
-var file = fs.createReadStream('origin.txt');
-var destFile = fs.createWriteStream('destination.txt');
-
-file.pipe(process.stdout);
-
-file.on('end', function(){
-  destFile.end('Finished!');
-});
-
-//You'll need to consult the pipe documentation to figure out the option which keeps the Write stream open and dispatches the end event.
-// var fs = require('fs');
-// var file = fs.createReadStream('origin.txt');
-// var destFile = fs.createWriteStream('destination.txt');
-file.pipe(destFile, { end: false });
-
-file.on('end', function(){
-  destFile.end('Finished!');
-});
-// From Documention
-// By default, stream.end() is called on the destination Writable stream when the source Readable stream emits 'end', so that the destination is no longer writable. 
-// To disable this default behavior, the end option can be passed as false, causing the destination stream to remain open, as illustrated in the following example:
-
-// reader.pipe(writer, { end: false });
-// reader.on('end', () => {
-//   writer.end('Goodbye\n');
-// });
-// One important caveat is that if the Readable stream emits an error during processing, the Writable destination is not closed automatically. 
-// If an error occurs, it will be necessary to manually close each stream in order to prevent memory leaks.
-
-// Note: The process.stderr and process.stdout Writable streams are never closed until the Node.js process exits, regardless of the specified options.
+//Notice the two different files: high_five.js on the left side and app.js on the right. 
+//The code as it's written will not work, high_five.js isn't exporting anything.
+//Add the proper exports line to have a successful high five!
+var highfive = function() {
+  console.log("smack!!");
+};
+module.exports = highfive;
 
 
-//Let's create an HTTP server that will serve index.html.
-var fs = require('fs');
+//Notice the app.js file with the myRequest function below. Let's refactor myRequest out to its own my_request.js module.
+//Move the myRequest function and the http require into my_request.js
+app.js
+
+var myRequest = require('./my_request');
+
+myRequest('Hello, this is dog.');
+
+my_request.js
+
 var http = require('http');
 
-http.createServer(function(request, response) {
-  response.writeHead(200, {'Content-Type': 'text/html'});
+var myRequest = function(message) {
+  var request = http.request('http://codeschool.com', function(response) {
+    response.pipe(process.stdout, { end: false });
+  });
 
-  var file = fs.createReadStream('index.html');
-}).listen(8080);
+  request.write(message);
+  request.end();
+};
+module.exports = myRequest;
 
 
-//Instead of manually listening for the 'readable' event on the Readable stream, let's use pipe to read from the stream and write directly to process.stdout.
-var fs = require('fs');
-var file = fs.createReadStream('fruits.txt');
-file.pipe(process.stdout);
-file.pipe('readable', function(){});
+//Require the my_request.js module in app.js.
+//Here's one possible answer.
+my_request.js
+var http = require('http');
+var myRequest = function(message) {
+  var request = http.request('http://codeschool.com', function(response) {
+    response.pipe(process.stdout, { end: false });
+  });
+
+  request.write(message);
+  request.end();
+};
+module.exports = myRequest;
+
+app.js
+var myRequest = require('./my_request');
+myRequest('Hello, this is dog.');
+
+
+//below code in logger.js file
+var warn = function(message) {
+  console.log("Warning: " + message);
+};
+
+var info = function(message) {
+  console.log("Info: " + message);
+};
+
+var error = function(message) {
+  console.log("Error: " + message);
+};
+  
+//In the logger.js file, export the info function so we can use it in app.js by assigning it to the exports object.
+exports.info = info;
+
+//In the logger.js file, export the warn function so we can use it in app.js by assigning it to the exports object.
+exports.warn = warn;
+
+//In the logger.js file, export the error function so we can use it in app.js by assigning it to the exports object.
+exports.error = error;
+
+
+//Dependency
+//Add two dependencies to our package.json file, connect and underscore. We'll want to use version 2.1.1 of connect and version 1.3.3 of underscore.
+//Add the connect dependency to package.json
+//Add the underscore dependency to package.json
+{
+  "name": "My Awesome Node App",
+  "version": "1",
+  "dependencies": {
+    "connect": "2.1.1",
+      "underscore": "1.3.3"    
+  }
+}
+
+//Semantic Versioning
+//We want to make sure we are always up-to-date with the most recent patch-level changes to our dependencies when we run npm install.
+//Update the connect version on package.json to fetch the latest patch-level changes. 
+//All we have to do is add one character to the beginning of the version number. -- you have to add the tilda ~
+//and the underscore version on package.json to fetch the latest patch-level changes.
+{
+  "name": "My Awesome Node App",
+  "version": "1",
+  "dependencies": {
+    "connect": "~2.2.1",
+    "underscore": "~1.3.3"
+  }
+}
 
