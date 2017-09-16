@@ -1,168 +1,224 @@
-//Building Blocks of Express - Level 2
+//Reading from the URL - Level 3
 
-//Mounting Middleware
-//Given an application instance is set to the app variable, what following function call would you use to mount a middleware 
-//called logger --> app.use(logger) 
+//City Search
+//We want to create an endpoint that we can use to filter cities. Follow the tasks below to to create this new route.
 
-//Default Middleware
-//The only middleware that's shipped with Express 4 is express-static
-
-//Express Static
-//Change the code in app.js to use the express-static middleware instead of the response.sendFile() function.
-//The example was:
-var express = require('express');
-var app = express();
-
-app.get('/', function (request, response) {
-  response.sendFile(__dirname + '/public/index.html');
-});
-app.get('/cities', function(req, res){
-  var cities = ['Lotopia', 'Caspiana', 'Indigo'];
-  res.send(cities);
-});
-app.listen(3001);
-
-//Will now remove our app.get() containing the root '/' route. -- updated example below, after mounting the static middleware and 
-//serving files under the public directory --> app.use(express.static('public'));
-//Results:
-var express = require('express');
-var app = express();
-
-app.use(express.static('public'));
-
-app.get('/cities', function(req, res){
-  var cities = ['Lotopia', 'Caspiana', 'Indigo'];
-  res.send(cities);
-});
-app.listen(3001);
-
-//Script Tags
-//Within index.html include jquery.js & client.js using script tags
-// <!DOCTYPE html>
-// <html lang="en">
-// <head>
-//   <meta charset="UTF-8">
-//   <title>Cities</title>
-// </head>
-// <body>
-//   <h1>Cities</h1>
-//   <ul class='city-list'></ul>
-
-  <script src="jquery.js"></script>
-  <script src="client.js"></script> 
-
-// </body>
-// </html>
-
-//from within client.js, complete the code for the $.get function so that it calls the /cities URL path, and then runs the appendToList function
-//The first argument should be the /cities and the second should be appendToList.
-
-// $(function(){
-
-  $.get('/cities', appendToList); 
-
-//   function appendToList(cities) {
-//     var list = [];
-//     for(var i in cities){
-//       list.push($('<li>', { text: cities[i] }));
-//     }
-//     $('.city-list').append(list);
-//   }
-// });
-
-
-//Logging Middleware
-//On the response object, listen to the event that's emitted when the response has been handed off from Express to the underlying Operating System.
-response.on('finish', function(){});
-
-//Inside of the finish callback, calculate the duration of the request by subtracting the startTime from a new Date object. 
-//Store the duration in the duration variable, which has already been declared for you.
-// module.exports = function (request, response, next) {
-//   var startTime = +new Date();
-//   var stream = process.stdout;
-//   var duration = null;
-
-  response.on('finish', function () {
-     duration = +new Date() - startTime;
-  });
-// };
-
-//Using the stream object, which holds a reference to standard out, 
-//write the following message: "This request took ____ ms", where ____ is the duration for the request.
-stream.write("This request took " + duration + " ms");
-
-//If we run the code as is, the request will be stuck in our middleware. Call the function that moves processing to the next middleware in the stack.
-next();
-
-//Full Example below:
-module.exports = function (request, response, next) {
-  var startTime = +new Date(); //the plus sign converts dateObject to milliseconds
-  var stream = process.stdout;
-  var duration = null;
-
-  response.on('finish', function () {
-    duration = +new Date() - startTime;
-    stream.write("This request took " + duration + " ms");
-  });
-  next();
-};
-
-//Add Logging Middleware
-In the following code in app.js, we require our new middleware and assign it to a variable called logger.
-var express = require('express');
-var app = express();
-var logger = require('./logger');
-
-//TODO: mount middleware
-app.use(logger)
-//is the function  we call in order to mount the middleware and add it to the stack
-
-app.listen(3000);
-
-
-//Only GET -- Let's build a middleware that ensures only GET requests are allowed to go through.
-//First, in the only_get.js file, create an anonymous function that uses the middleware signature and assign it to module.exports. 
-//Remember, the Express middleware function signature takes three arguments.
-module.exports = function(request, response, next){};
-
-//Use the request object to check if the HTTP method used is 'GET' and if it is, then call the function that moves processing 
-//to the next middleware in the stack.
-if(request.method === 'GET') {
-    next();
-};
-//If the HTTP method is not 'GET', then complete the request by sending back a message that says 'Method is not allowed'.
-else {
-    response.send('Method is not allowed');
-  };
+//Create a new route for GET requests to '/cities'. The second argument should be a callback function which takes request and response.
+app.get('/cities', function(request, response){
+  
+}); //From inside of our route, create an if statement that checks whether a value is set to the query string parameter search.
+if(request.query.search){
+    response.json(citySearch(request.query.search));
+  }
 
 //Full Example
-module.exports = function(request, response, next){
-  if(request.method === 'GET') {
-    next();
-  }else {
-    response.send('Method is not allowed');
-  }
-};
-
-//Buildings
 var express = require('express');
 var app = express();
 
-app.use(function(request, response, next){
-  if (request.path === "/cities"){
-    next();
-  } else {
-    response.status(404).json("Path requested does not exist");
+var cities = ['Caspiana', 'Indigo', 'Paradise'];
+
+app.get('/cities', function (request, response) {
+  if(request.query.search){
+    response.json(citySearch(request.query.search));
   }
 });
 
-app.get('/cities', function(request, response){
-  var cities = ['Caspiana', 'Indigo', 'Paradise'];
-  response.json(cities);
-});
+function citySearch (keyword) {
+  var regexp = RegExp(keyword, 'i');
+  var result = cities.filter(function (city) {
+    return city.match(regexp);
+  });
 
+  return result;
+}
 app.listen(3000);
 
-//When we run our previous code and issue a GET request to the /buildings endpoint, the response will be a 404 response with
-//Path requested does not exist
+
+//Dynamic Route Variables
+Consider the following Dynamic Route:
+app.get('/cities/:name', function (request, response) {
+  // ...
+})
+//When requests come in for this route, how can we access the city name submitted by the user?
+requests.params.name
+
+
+//City Information -- Now lets look up some information about the city.
+//Inside of our dynamic route, grab the name submitted by the user, lookup the city information on the cities object and assign it to the cityInfo variable.
+cityInfo = cities[request.params.name];
+
+//Check to see if cityInfo exists and if so, respond with the cityInfo in JSON format.
+if (cityInfo){
+    response.json(cityInfo);
+  }
+  
+//If cityInfo does not exist, respond with a 404 HTTP status code and a JSON message that says "City not found".
+else{
+    response.status(404);
+    response.json("City not found");
+  }
+  
+//Full Example:
+var express = require('express');
+var app = express();
+
+var cities = {
+  'Lotopia': 'Rough and mountainous',
+  'Caspiana': 'Sky-top island',
+  'Indigo': 'Vibrant and thriving',
+  'Paradise': 'Lush, green plantation',
+  'Flotilla': 'Bustling urban oasis'
+};
+app.get('/cities/:name', function (request, response) {
+  var cityInfo;
+  cityInfo = cities[request.params.name];
+  if (cityInfo){
+    response.json(cityInfo);
+  }else{
+    response.status(404);
+    response.json("City not found");
+  }
+});
+app.listen(3000);
+
+
+// //Flexible Routes 
+// Our current route only works when the city name argument matches exactly the properties in the cities object. This is a problem. 
+// We need a way to make our code more flexible.
+
+//Inside our route, call the parseCityName() function passing in the name parameter. 
+//Assign the return value to the new variable called cityName.
+var cityName; 
+  cityName = parseCityName(request.params.name);
+
+//Now, using the city name returned from the parseCityName() function, lookup the corresponding description using the cities object 
+//and store it in the correct variable that will make the rest of the function work as intended.
+var cityInfo = cities[cityName];
+
+var express = require('express');
+var app = express();
+
+var cities = {
+  'Lotopia': 'Rough and mountainous',
+  'Caspiana': 'Sky-top island',
+  'Indigo': 'Vibrant and thriving',
+  'Paradise': 'Lush, green plantation',
+  'Flotilla': 'Bustling urban oasis'
+};
+
+//Full Example:
+app.get('/cities/:name', function (request, response) {
+  var cityName; 
+  cityName = parseCityName(request.params.name);
+  var cityInfo = cities[cityName];
+  if(cityInfo) {
+    response.json(cityInfo);
+  } else {
+    response.status(404).json('City not found');
+  }
+});
+function parseCityName(name) {
+  var parsedName = name[0].toUpperCase() + name.slice(1).toLowerCase();
+  return parsedName;
+}
+app.listen(3000);
+
+//app.param() is the Express function that maps placeholders to callback functions, and is commonly used for running pre-conditions 
+//on Dynamic Routes
+
+
+//Dynamic Routes II
+// Whenever we use our name parameter we want to parse it a specific way. Let's clean up our existing code so that all routes with a 
+// name parameter get the same special handling.
+
+//Call app.param() to intercept requests that contain an argument called 'name'. Remember app.param() takes a callback function as 
+//its second argument, which uses the same signature as a middleware.
+app.param('name', function(request, response, next){});
+
+//Inside the app.param() callback function, call the parseCityName() function with the submitted name parameter. Set the return 
+//value to a new property in the request object called cityName.
+request.cityName = parseCityName(request.params.name);
+  next();
+  
+//Full Example:
+var express = require('express');
+var app = express();
+
+var cities = {
+  'Lotopia': 'Rough and mountainous',
+  'Caspiana': 'Sky-top island',
+  'Indigo': 'Vibrant and thriving',
+  'Paradise': 'Lush, green plantation',
+  'Flotilla': 'Bustling urban oasis'
+};
+app.param('name', function(request, response, next){
+  request.cityName=parseCityName(request.params.name);  
+  next();
+});
+app.get('/cities/:name', function (request, response) {
+  var cityInfo = cities[request.cityName];
+  if(cityInfo) {
+    response.json(cityInfo);
+  } else {
+    response.status(404).json("City not found");
+  }
+});
+function parseCityName(name){
+  var parsedName = name[0].toUpperCase() + name.slice(1).toLowerCase();
+  return parsedName;
+}
+app.listen(3000);
+
+
+// //Dynamic Routes III
+// The following code has a Dynamic Route that takes a year as an argument and returns the city created in that year. The problem with 
+// our current implementation is that it breaks when invalid data is sent on client requests. Let's add some basic validation.
+
+//Call a function that intercepts Dynamic Routes with the 'year' param.
+app.param('year', function(request, response, next){});
+
+//Inside of that function, use the isYearFormat() function to check whether the year parameter is in a valid format. 
+//If so, then move processing to the next function in the stack.
+if (isYearFormat(request.params.year)){
+    next();
+  }
+  
+//If the year parameter is not in a valid format, then respond with a 400 HTTP status code and a JSON message 'Invalid Format for Year'.
+else {
+    response.status(400).json('Invalid Format for Year');
+  }
+  
+
+//Full Example:
+var express = require('express');
+var app = express();
+app.param('year', function(request, response, next){
+  if (isYearFormat(request.params.year)){
+    next();
+  }else {
+    response.status(400).json('Invalid Format for Year');
+  }
+});
+var citiesYear = {
+  5000: 'Lotopia',
+  5100: 'Caspiana',
+  5105: 'Indigo',
+  6000: 'Paradise',
+  7000: 'Flotilla'
+};
+function isYearFormat(value) {
+  var regexp = RegExp(/^d{4}$/);
+  return regexp.test(value);
+}
+app.get('/cities/year/:year', function(request, response) {
+  var year = request.params.year;
+  var city = citiesYear[year];
+
+  if(!city) {
+    response.status(404).json("No City found for given year");
+  } else {
+    response.json("In " + year + ", " + city + " is created.");
+  }
+});
+app.listen(3000);                                                                                                                                                                                                                                                                                                       
 
