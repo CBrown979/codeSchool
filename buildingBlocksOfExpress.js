@@ -1,224 +1,131 @@
-//Reading from the URL - Level 3
+// POST Requests - Level 4
 
-//City Search
-//We want to create an endpoint that we can use to filter cities. Follow the tasks below to to create this new route.
+//Parser Setup
+//Assume the body-parser middleware is installed. Now, let's use it in our Express application.
 
-//Create a new route for GET requests to '/cities'. The second argument should be a callback function which takes request and response.
-app.get('/cities', function(request, response){
+//Require the body-parser npm module and assign it to a variable called bodyParser.
+var bodyParser = require('body-parser');
+
+//The body-parser middleware offers different parsing options. On the bodyParser object, call a function that returns a parser for 
+//URL encoded data and store it in a variable called parseUrlencoded. Remember to pass in an option which forces the use of the 
+//native querystring Node library.
+var parseURLencoded = bodyParser.urlencoded({extended: false});
+
+//Mount the parser only in the post route.
+app.post('/cities', parseUrlencoded, function (request, response) { //just added parseUrlencoded as 2nd parameter in existing example
+  var city;
+});
+
+//Read the name and description parameters from the payload of the POST request, and pass them as arguments to the createCity 
+//function (we've created this one for you). Store the return value on the city variable.
+var city = createCity(request.body.name, request.body.description);
+
+//Finally, respond back to the client with a 201 HTTP status code and the value stored in city in JSON format using json.
+response.status(201).json(city);
+
+//Full Example:
+var express = require('express');
+var app = express();
+var bodyParser = require('body-parser');
+var parseUrlencoded = bodyParser.urlencoded({ extended: false});
+
+app.post('/cities', parseUrlencoded, function (request, response) {
+  var city = createCity(request.body.name, request.body.description);
+  response.status(201).json(city);
+});
+app.listen(3000);
+
+var createCity = function(name, description){
+  cities[name] = description;
+  return name; 
+};
+
+//Validation
+//The way that it is now, we are allowing new cities to be created with a blank description. 
+//Let's add some validation so that in order for a city to be created, its description must have a string length greater than 4.
+
+//Add an if block that checks for a description.length greater than 4, and move our city creation logic into that block. 
+//Use json() to send the results from createCity back to the client.
+var newCity = request.body;
+  var city;
+  if (newCity.description.length > 4) {
+     city = createCity(newCity.name, newCity.description);
+     response.status(201).json(city); 
+  }
   
-}); //From inside of our route, create an if statement that checks whether a value is set to the query string parameter search.
-if(request.query.search){
-    response.json(citySearch(request.query.search));
+//If description does not match its minimum length requirements, then set a 400 status code (Bad Request) to the response, and 
+//set the response body to Invalid City using json().
+else {
+    response.status(400).json('Invalid City');
   }
 
 //Full Example
 var express = require('express');
 var app = express();
 
-var cities = ['Caspiana', 'Indigo', 'Paradise'];
+var bodyParser = require('body-parser');
+var parseUrlencoded = bodyParser.urlencoded({ extended: false });
 
-app.get('/cities', function (request, response) {
-  if(request.query.search){
-    response.json(citySearch(request.query.search));
-  }
-});
-
-function citySearch (keyword) {
-  var regexp = RegExp(keyword, 'i');
-  var result = cities.filter(function (city) {
-    return city.match(regexp);
-  });
-
-  return result;
-}
-app.listen(3000);
-
-
-//Dynamic Route Variables
-Consider the following Dynamic Route:
-app.get('/cities/:name', function (request, response) {
-  // ...
-})
-//When requests come in for this route, how can we access the city name submitted by the user?
-requests.params.name
-
-
-//City Information -- Now lets look up some information about the city.
-//Inside of our dynamic route, grab the name submitted by the user, lookup the city information on the cities object and assign it to the cityInfo variable.
-cityInfo = cities[request.params.name];
-
-//Check to see if cityInfo exists and if so, respond with the cityInfo in JSON format.
-if (cityInfo){
-    response.json(cityInfo);
-  }
-  
-//If cityInfo does not exist, respond with a 404 HTTP status code and a JSON message that says "City not found".
-else{
-    response.status(404);
-    response.json("City not found");
-  }
-  
-//Full Example:
-var express = require('express');
-var app = express();
-
-var cities = {
-  'Lotopia': 'Rough and mountainous',
-  'Caspiana': 'Sky-top island',
-  'Indigo': 'Vibrant and thriving',
-  'Paradise': 'Lush, green plantation',
-  'Flotilla': 'Bustling urban oasis'
-};
-app.get('/cities/:name', function (request, response) {
-  var cityInfo;
-  cityInfo = cities[request.params.name];
-  if (cityInfo){
-    response.json(cityInfo);
-  }else{
-    response.status(404);
-    response.json("City not found");
-  }
-});
-app.listen(3000);
-
-
-// //Flexible Routes 
-// Our current route only works when the city name argument matches exactly the properties in the cities object. This is a problem. 
-// We need a way to make our code more flexible.
-
-//Inside our route, call the parseCityName() function passing in the name parameter. 
-//Assign the return value to the new variable called cityName.
-var cityName; 
-  cityName = parseCityName(request.params.name);
-
-//Now, using the city name returned from the parseCityName() function, lookup the corresponding description using the cities object 
-//and store it in the correct variable that will make the rest of the function work as intended.
-var cityInfo = cities[cityName];
-
-var express = require('express');
-var app = express();
-
-var cities = {
-  'Lotopia': 'Rough and mountainous',
-  'Caspiana': 'Sky-top island',
-  'Indigo': 'Vibrant and thriving',
-  'Paradise': 'Lush, green plantation',
-  'Flotilla': 'Bustling urban oasis'
-};
-
-//Full Example:
-app.get('/cities/:name', function (request, response) {
-  var cityName; 
-  cityName = parseCityName(request.params.name);
-  var cityInfo = cities[cityName];
-  if(cityInfo) {
-    response.json(cityInfo);
+app.post('/cities', parseUrlencoded, function (request, response) {
+  var newCity = request.body;
+  var city;
+  if (newCity.description.length > 4) {
+     city = createCity(newCity.name, newCity.description);
+     response.status(201).json(city); 
   } else {
-    response.status(404).json('City not found');
+    response.status(400).json('Invalid City');
   }
 });
+app.listen(3000);
+
+
+//DELETE Requests
+//Create a Dynamic Route for deleting cities and handle for cities that are not in our list.
+
+//Create a DELETE route that takes the city name as its first argument, followed by a callback that takes a request and response objects as arguments.
+app.delete('/cities/:name', function(request, response){});
+
+//Use the built-in JavaScript operator delete (see MDN docs) to remove the property for the city passed as an argument. 
+//Don't forget to use the attribute set in app.param() to look the city up.
+delete cities[request.cityName];
+
+//Use sendStatus() to respond back with a status code of 200.
+response.sendStatus(200);
+
+//Add an if block that checks whether the cityName provided from app.param() has a valid entry before attempting to delete it 
+//from the cities object. If a valid city is not found, then respond with a 404 HTTP status code using the sendStatus() function.
+if(cities[request.cityName]){
+        delete cities[request.cityName];
+    response.sendStatus(200);
+    } else {
+        response.sendStatus(404);
+    }
+//Full Example
+var express = require('express');
+var app = express();
+
+var cities = {
+  'Lotopia': 'Rough and mountainous',
+  'Caspiana': 'Sky-top island',
+  'Indigo': 'Vibrant and thriving',
+  'Paradise': 'Lush, green plantation',
+  'Flotilla': 'Bustling urban oasis'
+};
+app.param('name', function (request, response, next) {
+  request.cityName = parseCityName(request.params.name);
+});
+       
+app.delete('/cities/:name', function(request, response){
+    if(cities[request.cityName]){
+        delete cities[request.cityName];
+    response.sendStatus(200);
+    } else {
+        response.sendStatus(404);
+    }
+});
+app.listen(3000);
+
 function parseCityName(name) {
   var parsedName = name[0].toUpperCase() + name.slice(1).toLowerCase();
   return parsedName;
 }
-app.listen(3000);
-
-//app.param() is the Express function that maps placeholders to callback functions, and is commonly used for running pre-conditions 
-//on Dynamic Routes
-
-
-//Dynamic Routes II
-// Whenever we use our name parameter we want to parse it a specific way. Let's clean up our existing code so that all routes with a 
-// name parameter get the same special handling.
-
-//Call app.param() to intercept requests that contain an argument called 'name'. Remember app.param() takes a callback function as 
-//its second argument, which uses the same signature as a middleware.
-app.param('name', function(request, response, next){});
-
-//Inside the app.param() callback function, call the parseCityName() function with the submitted name parameter. Set the return 
-//value to a new property in the request object called cityName.
-request.cityName = parseCityName(request.params.name);
-  next();
-  
-//Full Example:
-var express = require('express');
-var app = express();
-
-var cities = {
-  'Lotopia': 'Rough and mountainous',
-  'Caspiana': 'Sky-top island',
-  'Indigo': 'Vibrant and thriving',
-  'Paradise': 'Lush, green plantation',
-  'Flotilla': 'Bustling urban oasis'
-};
-app.param('name', function(request, response, next){
-  request.cityName=parseCityName(request.params.name);  
-  next();
-});
-app.get('/cities/:name', function (request, response) {
-  var cityInfo = cities[request.cityName];
-  if(cityInfo) {
-    response.json(cityInfo);
-  } else {
-    response.status(404).json("City not found");
-  }
-});
-function parseCityName(name){
-  var parsedName = name[0].toUpperCase() + name.slice(1).toLowerCase();
-  return parsedName;
-}
-app.listen(3000);
-
-
-// //Dynamic Routes III
-// The following code has a Dynamic Route that takes a year as an argument and returns the city created in that year. The problem with 
-// our current implementation is that it breaks when invalid data is sent on client requests. Let's add some basic validation.
-
-//Call a function that intercepts Dynamic Routes with the 'year' param.
-app.param('year', function(request, response, next){});
-
-//Inside of that function, use the isYearFormat() function to check whether the year parameter is in a valid format. 
-//If so, then move processing to the next function in the stack.
-if (isYearFormat(request.params.year)){
-    next();
-  }
-  
-//If the year parameter is not in a valid format, then respond with a 400 HTTP status code and a JSON message 'Invalid Format for Year'.
-else {
-    response.status(400).json('Invalid Format for Year');
-  }
-  
-
-//Full Example:
-var express = require('express');
-var app = express();
-app.param('year', function(request, response, next){
-  if (isYearFormat(request.params.year)){
-    next();
-  }else {
-    response.status(400).json('Invalid Format for Year');
-  }
-});
-var citiesYear = {
-  5000: 'Lotopia',
-  5100: 'Caspiana',
-  5105: 'Indigo',
-  6000: 'Paradise',
-  7000: 'Flotilla'
-};
-function isYearFormat(value) {
-  var regexp = RegExp(/^d{4}$/);
-  return regexp.test(value);
-}
-app.get('/cities/year/:year', function(request, response) {
-  var year = request.params.year;
-  var city = citiesYear[year];
-
-  if(!city) {
-    response.status(404).json("No City found for given year");
-  } else {
-    response.json("In " + year + ", " + city + " is created.");
-  }
-});
-app.listen(3000);                                                                                                                                                                                                                                                                                                       
-
