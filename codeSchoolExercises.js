@@ -351,3 +351,352 @@ app.controller('GalleryController', function(){
           </li>
         </ul>
       </div>
+      
+//Displaying Reviews should seem repetitive
+//We added reviews to all the products, as you can see in the js file. Inside our Reviews tab display ALL the reviews for a
+//product. Make sure you show the reviews body, author, and stars.
+
+//You need to create multiple li's for each review that exists.
+<li ng-repeat="review in product.reviews">
+
+//Set the blockquote stars ( strong tag) to the review stars.
+<li ng-repeat="review in product.reviews">
+                <blockquote>
+                  <strong>{{review.stars}} Stars</strong>
+                  {{review.body}}
+                  
+                  <cite class="clearfix">—</cite>
+                </blockquote>
+              </li>
+                  
+//Set the cite to the review author.
+    <cite class="clearfix">{{review.author}}</cite>
+    
+//Create a Review Form
+//We have provided a form below the list of reviews and a preview blockquote that will show when the form is being filled out. 
+//Add ng-model to each input item stars, body, and author. Remember, each one is a part of the review object as a whole.
+
+//Use ng-model for review.stars select form field.
+<select ng-model="review.stars" class="form-control" ng-options="stars for stars in [5,4,3,2,1]" title="Stars">
+  <option value="">Rate the Product</option>
+</select>
+
+//Use ng-model for review.body for the forms textarea.
+<h4>Submit a Review</h4>
+              <fieldset class="form-group">
+                <select ng-model="review.stars" class="form-control" ng-options="stars for stars in [5,4,3,2,1]"  title="Stars">
+                  <option value="">Rate the Product</option>
+                </select>
+              </fieldset>
+              <fieldset class="form-group">
+                <textarea ng-model="review.body" class="form-control" placeholder="Write a short review of the product..." title="Review"></textarea>
+              </fieldset>
+              <fieldset class="form-group">
+                <input ng-model="review.author" type="email" class="form-control" placeholder="jimmyDean@example.org" title="Email" />
+              </fieldset>
+              <fieldset class="form-group">
+                <input type="submit" class="btn btn-primary pull-right" value="Submit Review" />
+              </fieldset>
+            </form>
+            
+//REview Live Preview
+//Display all three parts of the review in the preview blockquote.
+
+//In the strong tag, before Stars, put in the right expression to display review.stars. 
+//Keep the space prior to Stars
+<strong>{{review.stars}} Stars</strong>
+
+//On the blank line with no tags put in the right expression to display review.body
+{{review.body}}
+
+//In the cite tag, immediately after the -, put in the right expression to display review.author.
+//Live Preview
+<blockquote>
+  <strong>{{review.stars}} Stars</strong>
+  {{review.body}}
+  <cite class="clearfix">-{{review.author}}</cite>
+</blockquote>
+
+//Creating Review Controller 
+//Create a ReviewController and inside of it an empty review ripe for the stuffing! 
+//Then below that create the functionality to create new reviews.
+
+//Create a new controller called ReviewController.
+  app.controller('ReviewController', function(){
+      //Set our review variable to an empty object when the ReviewController is created.
+      this.review={};
+      
+      //Create an empty function named addReview in your ReviewController.
+      this.addReview = function(product) {
+
+    //We'll pass in the product we want to review to our addReview function. 
+    //Edit your function declaration to accept a product parameter -- SEE ABOVE
+    
+     //When addReview is called with a product, it should add the review from the controller to the passed-in product's reviews 
+     //array. Implement this functionality in the addReview method.
+     product.reviews.push(this.review);
+     
+     //Reset the review to an empty object after it's been added to product.reviews.
+    this.review = {};
+  };
+});
+
+//Full Example
+(function() {
+  var app = angular.module('gemStore', []);
+
+  app.controller('StoreController', function(){
+    this.products = gems;
+  });
+
+  app.controller('TabController', function(){
+    this.tab = 1;
+
+    this.setTab = function(tab){
+      this.tab = tab;
+    };
+
+    this.isSet = function(tab){
+      return (this.tab === tab);
+    };
+  });
+
+  app.controller('GalleryController', function(){
+    this.current = 0;
+
+    this.setCurrent = function(index){
+      this.current = index;
+    };
+  });
+
+  app.controller('ReviewController', function(){
+    this.review = {};
+    this.addReview = function(product){
+      product.reviews.push(this.review);
+      this.review = {};
+    };
+
+  });
+
+  var gems = [
+    {
+      name: 'Azurite',
+      description: "Some gems have hidden qualities beyond their luster, beyond their shine... Azurite is one of those gems.",
+      shine: 8,
+      price: 110.50,
+      rarity: 7,
+      color: '#CCC',
+      faces: 14,
+      images: [
+        "images/gem-02.gif",
+        "images/gem-05.gif",
+        "images/gem-09.gif"
+      ],
+      reviews: [{
+        stars: 5,
+        body: "I love this gem!",
+        author: "joe@example.org",
+        createdOn: 1397490980837
+      }, {
+        stars: 1,
+        body: "This gem sucks.",
+        author: "tim@example.org",
+        createdOn: 1397490980837
+      }]
+    }, {
+      name: 'Bloodstone',
+      description: "Origin of the Bloodstone is unknown, hence its low value. It has a very high shine and 12 sides, however.",
+      shine: 9,
+      price: 22.90,
+      rarity: 6,
+      color: '#EEE',
+      faces: 12,
+      images: [
+        "images/gem-01.gif",
+        "images/gem-03.gif",
+        "images/gem-04.gif",
+      ],
+      reviews: [{
+        stars: 3,
+        body: "I think this gem was just OK, could honestly use more shine, IMO.",
+        author: "JimmyDean@example.org",
+        createdOn: 1397490980837
+      }, {
+        stars: 4,
+        body: "Any gem with 12 faces is for me!",
+        author: "gemsRock@example.org",
+        createdOn: 1397490980837
+      }]
+    }, {
+      name: 'Zircon',
+      description: "Zircon is our most coveted and sought after gem. You will pay much to be the proud owner of this gorgeous and high shine gem.",
+      shine: 70,
+      price: 1100,
+      rarity: 2,
+      color: '#000',
+      faces: 6,
+      images: [
+        "images/gem-06.gif",
+        "images/gem-07.gif",
+        "images/gem-08.gif"
+      ],
+      reviews: [{
+        stars: 1,
+        body: "This gem is WAY too expensive for its rarity value.",
+        author: "turtleguyy@example.org",
+        createdOn: 1397490980837
+      }, {
+        stars: 1,
+        body: "BBW: High Shine != High Quality.",
+        author: "LouisW407@example.org",
+        createdOn: 1397490980837
+      }, {
+        stars: 1,
+        body: "Don't waste your rubles!",
+        author: "nat@example.org",
+        createdOn: 1397490980837
+      }]
+    }
+  ];
+})();
+
+
+//Using Review Controller 250 PTS
+//Assign the review controller we just created to our form and use the alias reviewCtrl to reference it inside the form. 
+//On submission of the form save the new review.
+
+//Inside the form tag create a ng-controller attribute and assign it to the ReviewController with an alias of reviewCtrl.
+
+<form name="reviewForm" ng-controller="ReviewController as reviewCtrl" 
+
+//Inside the form tag create a ng-submit attribute. Set the value of the ng-submit attribute to call our new addReview function. 
+//Remember to pass in product when calling the addReview function.
+ng-submit="reviewCtrl.addReview(product)">
+
+//Prefix all three ng-models with the controller's alias.
+<h4>Submit a Review</h4>
+  <fieldset class="form-group">
+    <select ng-model="reviewCtrl.review.stars" class="form-control" ng-options="stars for stars in [5,4,3,2,1]" title="Stars">
+      <option value="">Rate the Product</option>
+    </select>
+  </fieldset>
+  <fieldset class="form-group">
+    <textarea ng-model="reviewCtrl.review.body" class="form-control" placeholder="Write a short review of the product..." title="Review"></textarea>
+  </fieldset>
+  <fieldset class="form-group">
+    <input ng-model="reviewCtrl.review.author" type="email" class="form-control" placeholder="jimmyDean@example.org" title="Email" />
+  </fieldset>
+  <fieldset class="form-group">
+    <input type="submit" class="btn btn-primary pull-right" value="Submit Review" />
+  </fieldset>
+</form>
+
+//If you will notice, our live preview is no longer working. Try and figure out why and get the preview blockquote working again!
+<!--  Live Preview -->
+  <blockquote>
+    <strong>{{reviewCtrl.review.stars}} Stars</strong>
+    {{reviewCtrl.review.body}}
+    <cite class="clearfix">—{{reviewCtrl.review.author}}</cite>
+  </blockquote>
+
+  <!--  Review Form -->
+  <h4>Submit a Review</h4>
+  <fieldset class="form-group">
+    <select ng-model="reviewCtrl.review.stars" class="form-control" ng-options="stars for stars in [5,4,3,2,1]" title="Stars">
+      <option value="">Rate the Product</option>
+    </select>
+  </fieldset>
+  <fieldset class="form-group">
+    <textarea ng-model="reviewCtrl.review.body" class="form-control" placeholder="Write a short review of the product..." title="Review"></textarea>
+  </fieldset>
+  <fieldset class="form-group">
+    <input ng-model="reviewCtrl.review.author" type="email" class="form-control" placeholder="jimmyDean@example.org" title="Email" />
+  </fieldset>
+  <fieldset class="form-group">
+    <input type="submit" class="btn btn-primary pull-right" value="Submit Review" />
+  </fieldset>
+</form>
+
+//Form Validations
+//Use the fancy directives you just learned to validate the new review form.
+
+//Turn Off HTML Validation
+//Add the novalidate directive to our form in order to turn off default HTML validation.
+<form name="reviewForm" ng-controller="ReviewController as reviewCtrl" ng-submit="reviewCtrl.addReview(product)" novalidate>
+
+//Mark stars & author as required fields.
+<fieldset class="form-group">
+  <select ng-model="reviewCtrl.review.stars" class="form-control" ng-options="stars for stars in [5,4,3,2,1]" title="Stars" required>
+    <option value="">Rate the Product</option>
+  </select>
+</fieldset>
+<fieldset class="form-group">
+  <textarea ng-model="reviewCtrl.review.body" class="form-control" placeholder="Write a short review of the product..." title="Review" required></textarea>
+</fieldset>
+<fieldset class="form-group">
+  <input ng-model="reviewCtrl.review.author" type="email" class="form-control" placeholder="jimmyDean@example.org" title="Email" required />
+</fieldset>
+
+//Prevent the submit if not $valid
+
+<!--  Review Form -->
+<form name="reviewForm" ng-controller="ReviewController as reviewCtrl" ng-submit="reviewForm.$valid && reviewCtrl.addReview(product)" novalidate>
+
+              <!--  Live Preview -->
+              <blockquote >
+    <strong>{{reviewCtrl.review.stars}} Stars</strong>
+    {{reviewCtrl.review.body}}
+    <cite class="clearfix">—{{reviewCtrl.review.author}}</cite>
+  </blockquote>
+              <!--  Review Form -->
+              <h4>Submit a Review</h4>
+              <fieldset class="form-group">
+    <select ng-model="reviewCtrl.review.stars" class="form-control" ng-options="stars for stars in [5,4,3,2,1]" title="Stars" required >
+      <option value="">Rate the Product</option>
+    </select>
+  </fieldset>
+  <fieldset class="form-group">
+    <textarea ng-model="reviewCtrl.review.body" class="form-control" placeholder="Write a short review of the product..." title="Review"></textarea>
+  </fieldset>
+  <fieldset class="form-group">
+    <input ng-model="reviewCtrl.review.author" type="email" class="form-control" placeholder="jimmyDean@example.org" title="Email" required />
+  </fieldset>
+  <fieldset class="form-group">
+    <input type="submit" class="btn btn-primary pull-right" value="Submit Review" />
+  </fieldset>
+</form>
+
+//Form Styling
+//Give the defined classes in your css colors. See the magic of ng-invalid/ng-valid at work!
+
+//For elements with both the .ng-invalid and .ng-dirty classes, give the border-color of red.
+//Add a style for .ng-invalid.ng-dirty setting the border-color to red.
+
+.ng-invalid.ng-dirty {
+  border-color: red;
+}
+
+//For ng-valid && ng-dirty, give a green border-color
+.ng-valid.ng-dirty {
+  border-color: green;
+}
+
+//Showing CreatedOn Date
+//It's time to show when a review was created using the createdOn property. Follow the task below to add this in.
+
+Upon saving a review, we're running the addReview function in our app.js JavaScript file. 
+Before the review is pushed onto the array, add to this.review a new property createdOn with a value Date.now().
+this.addReview = function(product){
+  this.review.createdOn = Date.now();
+  product.reviews.push(this.review);
+  this.review = {};
+};
+
+// In the review template, we're already displaying most of the information about our review. 
+// Add the createdOn date to the review within the cite element. We want it to say "-<Author> on <date>".
+
+//You can output the createdOn date for the review in a similar way to how we output the other attributes of the review.
+<cite class="clearfix">—{{review.author}} on {{review.createdOn}}</cite>
+
+//Use the date filter on the createdOn property in the template.
+<cite class="clearfix">—{{review.author}} on {{review.createdOn | date}}</cite>
