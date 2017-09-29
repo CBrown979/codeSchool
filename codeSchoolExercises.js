@@ -696,7 +696,13 @@ this.addReview = function(product){
 // Add the createdOn date to the review within the cite element. We want it to say "-<Author> on <date>".
 
 //You can output the createdOn date for the review in a similar way to how we output the other attributes of the review.
-<cite class="clearfix">—{{review.author}} on {{review.createdOn}}</cite>
+<cite class="clearfix">{{review.author}} on {{review.createdOn}}</cite>
 
 //Use the date filter on the createdOn property in the template.
-<cite class="clearfix">—{{review.author}} on {{review.createdOn | date}}</cite>
+<cite class="clearfix">{{review.author}} on {{review.createdOn | date}}</cite>
+
+//Refactoring Description Tab
+// Notice that we have created an empty html file called product-description.html. Separate out the Description 
+// Tab's content into the new html file. Include the product-description.html in our index where it belongs.
+
+//Separate out our description tab into product-description.html.
